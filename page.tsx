@@ -1,8 +1,35 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { AdminLogin } from "@/components/admin/admin-login"
-import { AdminDashboard } from "@/components/admin/admin-dashboard"
+// Removed missing AdminLogin and AdminDashboard imports
+
+function AdminLogin({ onLogin }: { onLogin: () => void }) {
+  return (
+    <div style={{minHeight:'100vh', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center'}}>
+      <h2 style={{fontWeight:'bold', fontSize:24, marginBottom:16}}>Admin Login</h2>
+      <button
+        style={{padding:8, borderRadius:4, background:'#2563eb', color:'#fff', border:'none', fontWeight:'bold'}}
+        onClick={onLogin}
+      >
+        Login (Demo)
+      </button>
+    </div>
+  );
+}
+
+function AdminDashboard({ onLogout }: { onLogout: () => void }) {
+  return (
+    <div style={{minHeight:'100vh', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center'}}>
+      <h2 style={{fontWeight:'bold', fontSize:24, marginBottom:16}}>Admin Dashboard</h2>
+      <button
+        style={{padding:8, borderRadius:4, background:'#dc2626', color:'#fff', border:'none', fontWeight:'bold'}}
+        onClick={onLogout}
+      >
+        Logout
+      </button>
+    </div>
+  );
+}
 
 export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)

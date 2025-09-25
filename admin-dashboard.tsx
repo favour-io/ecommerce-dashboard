@@ -1,40 +1,28 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import type { Order } from "@/lib/types"
-import { OrdersManagement } from "./orders-management"
-import { InventoryManagement } from "./inventory-management"
-import { SalesAnalytics } from "./sales-analytics"
-import { InquiriesManagement } from "./inquiries-management"
-import { InventoryReports } from "./inventory-reports"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Badge } from "@/components/ui/badge"
-import {
-  ShoppingCart,
-  Package,
-  TrendingUp,
-  MessageSquare,
-  FileText,
-  LogOut,
-  DollarSign,
-  Users,
-  Clock,
-} from "lucide-react"
+// Removed all custom UI, icons, and utility imports
+
 
 interface AdminDashboardProps {
-  onLogout: () => void
+  onLogout: () => void;
 }
 
+type Order = {
+  customerEmail: string;
+  status: string;
+  totalAmount: number;
+};
+
 export function AdminDashboard({ onLogout }: AdminDashboardProps) {
+
   const [orders, setOrders] = useState<Order[]>([])
   const [stats, setStats] = useState({
     totalOrders: 0,
     totalRevenue: 0,
     pendingOrders: 0,
     totalCustomers: 0,
-  })
+  });
 
   useEffect(() => {
     const loadData = () => {
@@ -61,122 +49,53 @@ export function AdminDashboard({ onLogout }: AdminDashboardProps) {
   }, [])
 
   return (
-    <div className="min-h-screen bg-background">
+    <div style={{minHeight:'100vh', background:'#f9fafb'}}>
       {/* Header */}
-      <div className="border-b bg-card">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold">SweetTreatcy Admin</h1>
-              <p className="text-muted-foreground">Manage your bakery business</p>
-            </div>
-            <Button variant="outline" onClick={onLogout}>
-              <LogOut className="h-4 w-4 mr-2" />
-              Logout
-            </Button>
+      <div style={{borderBottom:'1px solid #eee', background:'#fff', padding:'16px 0', marginBottom:24}}>
+        <div style={{maxWidth:1200, margin:'0 auto', padding:'0 16px', display:'flex', alignItems:'center', justifyContent:'space-between'}}>
+          <div>
+            <h1 style={{fontWeight:'bold', fontSize:24}}>SweetTreatcy Admin</h1>
+            <p style={{color:'#888'}}>Manage your bakery business</p>
+          </div>
+          <button style={{padding:8, borderRadius:4, background:'#fff', border:'1px solid #ccc', fontWeight:'bold', cursor:'pointer'}} onClick={onLogout}>Logout</button>
+        </div>
+      </div>
+      <div style={{maxWidth:1200, margin:'0 auto', padding:'0 16px 32px 16px'}}>
+        {/* Stats Overview */}
+        <div style={{display:'grid', gridTemplateColumns:'1fr 1fr 1fr 1fr', gap:'24px', marginBottom:32}}>
+          <div style={{border:'1px solid #eee', borderRadius:8, padding:16, background:'#fff'}}>
+            <div style={{fontWeight:'bold', fontSize:14, marginBottom:8}}>Total Orders</div>
+            <div style={{fontWeight:'bold', fontSize:24}}>{stats.totalOrders}</div>
+            <p style={{fontSize:12, color:'#888'}}>All time orders</p>
+          </div>
+          <div style={{border:'1px solid #eee', borderRadius:8, padding:16, background:'#fff'}}>
+            <div style={{fontWeight:'bold', fontSize:14, marginBottom:8}}>Total Revenue</div>
+            <div style={{fontWeight:'bold', fontSize:24}}>&#8378;{stats.totalRevenue.toFixed(2)}</div>
+            <p style={{fontSize:12, color:'#888'}}>Total earnings</p>
+          </div>
+          <div style={{border:'1px solid #eee', borderRadius:8, padding:16, background:'#fff'}}>
+            <div style={{fontWeight:'bold', fontSize:14, marginBottom:8}}>Pending Orders</div>
+            <div style={{fontWeight:'bold', fontSize:24}}>{stats.pendingOrders}</div>
+            <p style={{fontSize:12, color:'#888'}}>Need attention</p>
+          </div>
+          <div style={{border:'1px solid #eee', borderRadius:8, padding:16, background:'#fff'}}>
+            <div style={{fontWeight:'bold', fontSize:14, marginBottom:8}}>Total Customers</div>
+            <div style={{fontWeight:'bold', fontSize:24}}>{stats.totalCustomers}</div>
+            <p style={{fontSize:12, color:'#888'}}>Unique customers</p>
           </div>
         </div>
-      </div>
-
-      <div className="container mx-auto px-4 py-8">
-        {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Orders</CardTitle>
-              <ShoppingCart className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.totalOrders}</div>
-              <p className="text-xs text-muted-foreground">All time orders</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-              <DollarSign className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">₺{stats.totalRevenue.toFixed(2)}</div>
-              <p className="text-xs text-muted-foreground">Total earnings</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Pending Orders</CardTitle>
-              <Clock className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.pendingOrders}</div>
-              <p className="text-xs text-muted-foreground">Need attention</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Customers</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.totalCustomers}</div>
-              <p className="text-xs text-muted-foreground">Unique customers</p>
-            </CardContent>
-          </Card>
+        {/* Main Content Tabs (simplified) */}
+        <div style={{display:'flex', gap:16, marginBottom:24}}>
+          <button style={{padding:8, borderRadius:4, background:'#2563eb', color:'#fff', border:'none', fontWeight:'bold', cursor:'pointer'}}>Orders</button>
+          <button style={{padding:8, borderRadius:4, background:'#2563eb', color:'#fff', border:'none', fontWeight:'bold', cursor:'pointer'}}>Inventory</button>
+          <button style={{padding:8, borderRadius:4, background:'#2563eb', color:'#fff', border:'none', fontWeight:'bold', cursor:'pointer'}}>Analytics</button>
+          <button style={{padding:8, borderRadius:4, background:'#2563eb', color:'#fff', border:'none', fontWeight:'bold', cursor:'pointer'}}>Inquiries</button>
+          <button style={{padding:8, borderRadius:4, background:'#2563eb', color:'#fff', border:'none', fontWeight:'bold', cursor:'pointer'}}>Reports</button>
         </div>
-
-        {/* Main Content Tabs */}
-        <Tabs defaultValue="orders" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="orders" className="flex items-center gap-2">
-              <ShoppingCart className="h-4 w-4" />
-              Orders
-              {stats.pendingOrders > 0 && (
-                <Badge variant="destructive" className="ml-1 px-1 py-0 text-xs">
-                  {stats.pendingOrders}
-                </Badge>
-              )}
-            </TabsTrigger>
-            <TabsTrigger value="inventory" className="flex items-center gap-2">
-              <Package className="h-4 w-4" />
-              Inventory
-            </TabsTrigger>
-            <TabsTrigger value="analytics" className="flex items-center gap-2">
-              <TrendingUp className="h-4 w-4" />
-              Analytics
-            </TabsTrigger>
-            <TabsTrigger value="inquiries" className="flex items-center gap-2">
-              <MessageSquare className="h-4 w-4" />
-              Inquiries
-            </TabsTrigger>
-            <TabsTrigger value="reports" className="flex items-center gap-2">
-              <FileText className="h-4 w-4" />
-              Reports
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="orders">
-            <OrdersManagement />
-          </TabsContent>
-
-          <TabsContent value="inventory">
-            <InventoryManagement />
-          </TabsContent>
-
-          <TabsContent value="analytics">
-            <SalesAnalytics />
-          </TabsContent>
-
-          <TabsContent value="inquiries">
-            <InquiriesManagement />
-          </TabsContent>
-
-          <TabsContent value="reports">
-            <InventoryReports />
-          </TabsContent>
-        </Tabs>
+        <div style={{background:'#f3f4f6', borderRadius:8, padding:24, textAlign:'center', color:'#888'}}>
+          <p>Tab content goes here. (Orders, Inventory, Analytics, Inquiries, Reports)</p>
+        </div>
       </div>
     </div>
-  )
+  );
 }

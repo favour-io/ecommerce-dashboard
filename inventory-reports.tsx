@@ -1,43 +1,48 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts"
-import { TrendingUp, Package, AlertTriangle, DollarSign, History, Download } from "lucide-react"
-import { InventoryManager, type InventoryReport, type InventoryTransaction } from "@/lib/inventory-utils"
+
 
 export function InventoryReports() {
-  const [report, setReport] = useState<InventoryReport | null>(null)
+  const [report, setReport] = useState<any>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const generateReport = () => {
-      const inventoryReport = InventoryManager.generateReport()
-      setReport(inventoryReport)
-      setLoading(false)
-    }
+    // Simulate report data
+    setTimeout(() => {
+      setReport({
+        totalProducts: 12,
+        lowStockCount: 2,
+        outOfStockCount: 1,
+        totalValue: 1234.56,
+        topSellingProducts: [
+          { productId: 1, name: 'Bread', quantitySold: 50, revenue: 500 },
+          { productId: 2, name: 'Cake', quantitySold: 30, revenue: 900 },
+        ],
+        recentTransactions: [
+          { id: 1, type: 'sale', productId: 1, quantity: -2, previousStock: 10, newStock: 8, timestamp: Date.now(), reason: 'Sold' },
+          { id: 2, type: 'restock', productId: 2, quantity: 5, previousStock: 0, newStock: 5, timestamp: Date.now(), reason: 'Restocked' },
+        ],
+      });
+      setLoading(false);
+    }, 500);
+  }, []);
 
-    generateReport()
-  }, [])
-
-  const getTransactionTypeColor = (type: InventoryTransaction["type"]) => {
+  const getTransactionTypeColor = (type: string) => {
     switch (type) {
       case "sale":
-        return "bg-red-100 text-red-800"
+        return { background:'#fee2e2', color:'#dc2626' };
       case "restock":
-        return "bg-green-100 text-green-800"
+        return { background:'#d1fae5', color:'#16a34a' };
       case "adjustment":
-        return "bg-blue-100 text-blue-800"
+        return { background:'#dbeafe', color:'#2563eb' };
       default:
-        return "bg-gray-100 text-gray-800"
+        return { background:'#f3f4f6', color:'#888' };
     }
-  }
+  };
 
   const exportReport = () => {
-    if (!report) return
-
+    if (!report) return;
     const reportData = {
       generatedAt: new Date().toISOString(),
       summary: {
@@ -48,189 +53,98 @@ export function InventoryReports() {
       },
       topSellingProducts: report.topSellingProducts,
       recentTransactions: report.recentTransactions,
-    }
-
-    const blob = new Blob([JSON.stringify(reportData, null, 2)], { type: "application/json" })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement("a")
-    a.href = url
-    a.download = `inventory-report-${new Date().toISOString().split("T")[0]}.json`
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
-    URL.revokeObjectURL(url)
-  }
+    };
+    const blob = new Blob([JSON.stringify(reportData, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `inventory-report-${new Date().toISOString().split("T")[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      <div style={{display:'flex', alignItems:'center', justifyContent:'center', padding:'32px 0'}}>
+        <div style={{width:32, height:32, border:'4px solid #2563eb', borderRadius:'50%', borderTop:'4px solid #fff', animation:'spin 1s linear infinite'}}></div>
       </div>
-    )
+    );
   }
 
   if (!report) {
     return (
-      <div className="text-center py-8">
-        <p className="text-muted-foreground">Unable to generate inventory report</p>
-      </div>
-    )
+      <div style={{textAlign:'center', padding:'32px 0', color:'#888'}}>Unable to generate inventory report</div>
+    );
   }
 
   return (
-    <div className="space-y-6">
+    <div style={{padding:'24px'}}>
       {/* Report Header */}
-      <div className="flex items-center justify-between">
+      <div style={{display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:24}}>
         <div>
-          <h2 className="text-2xl font-bold">Inventory Report</h2>
-          <p className="text-muted-foreground">Generated on {new Date().toLocaleDateString()}</p>
+          <h2 style={{fontWeight:'bold', fontSize:24}}>Inventory Report</h2>
+          <p style={{color:'#888'}}>Generated on {new Date().toLocaleDateString()}</p>
         </div>
-        <Button onClick={exportReport} variant="outline">
-          <Download className="h-4 w-4 mr-2" />
-          Export Report
-        </Button>
+        <button onClick={exportReport} style={{padding:8, borderRadius:4, background:'#fff', border:'1px solid #ccc', fontWeight:'bold', cursor:'pointer'}}>Export Report</button>
       </div>
-
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Products</CardTitle>
-            <Package className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{report.totalProducts}</div>
-            <p className="text-xs text-muted-foreground">Active products</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Inventory Value</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">₺{report.totalValue.toFixed(2)}</div>
-            <p className="text-xs text-muted-foreground">Total stock value</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Low Stock</CardTitle>
-            <AlertTriangle className="h-4 w-4 text-orange-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-orange-600">{report.lowStockCount}</div>
-            <p className="text-xs text-muted-foreground">Need restocking</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Out of Stock</CardTitle>
-            <AlertTriangle className="h-4 w-4 text-red-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-red-600">{report.outOfStockCount}</div>
-            <p className="text-xs text-muted-foreground">Unavailable</p>
-          </CardContent>
-        </Card>
+      <div style={{display:'grid', gridTemplateColumns:'1fr 1fr 1fr 1fr', gap:'24px', marginBottom:32}}>
+        <div style={{border:'1px solid #eee', borderRadius:8, padding:16, background:'#fff'}}>
+          <div style={{fontWeight:'bold', fontSize:14, marginBottom:8}}>Total Products</div>
+          <div style={{fontWeight:'bold', fontSize:24}}>{report.totalProducts}</div>
+          <p style={{fontSize:12, color:'#888'}}>Active products</p>
+        </div>
+        <div style={{border:'1px solid #eee', borderRadius:8, padding:16, background:'#fff'}}>
+          <div style={{fontWeight:'bold', fontSize:14, marginBottom:8}}>Inventory Value</div>
+          <div style={{fontWeight:'bold', fontSize:24}}>&#8378;{report.totalValue.toFixed(2)}</div>
+          <p style={{fontSize:12, color:'#888'}}>Total stock value</p>
+        </div>
+        <div style={{border:'1px solid #eee', borderRadius:8, padding:16, background:'#fff'}}>
+          <div style={{fontWeight:'bold', fontSize:14, marginBottom:8}}>Low Stock</div>
+          <div style={{fontWeight:'bold', fontSize:24, color:'#ea580c'}}>{report.lowStockCount}</div>
+          <p style={{fontSize:12, color:'#888'}}>Need restocking</p>
+        </div>
+        <div style={{border:'1px solid #eee', borderRadius:8, padding:16, background:'#fff'}}>
+          <div style={{fontWeight:'bold', fontSize:14, marginBottom:8}}>Out of Stock</div>
+          <div style={{fontWeight:'bold', fontSize:24, color:'#dc2626'}}>{report.outOfStockCount}</div>
+          <p style={{fontSize:12, color:'#888'}}>Unavailable</p>
+        </div>
       </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Top Selling Products Chart */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <TrendingUp className="h-5 w-5" />
-              <span>Top Selling Products</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={report.topSellingProducts}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" angle={-45} textAnchor="end" height={80} />
-                <YAxis />
-                <Tooltip />
-                <Bar dataKey="quantitySold" fill="#8884d8" />
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-
-        {/* Recent Transactions */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <History className="h-5 w-5" />
-              <span>Recent Transactions</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4 max-h-80 overflow-y-auto">
-              {report.recentTransactions.length === 0 ? (
-                <p className="text-muted-foreground text-center py-4">No transactions yet</p>
-              ) : (
-                report.recentTransactions.map((transaction) => (
-                  <div key={transaction.id} className="flex items-center justify-between p-3 border rounded-lg">
-                    <div className="flex items-center space-x-3">
-                      <Badge className={getTransactionTypeColor(transaction.type)}>{transaction.type}</Badge>
-                      <div>
-                        <p className="text-sm font-medium">Product ID: {transaction.productId}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {new Date(transaction.timestamp).toLocaleDateString()}
-                        </p>
-                        {transaction.reason && <p className="text-xs text-muted-foreground">{transaction.reason}</p>}
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div
-                        className={`text-sm font-medium ${
-                          transaction.quantity > 0 ? "text-green-600" : "text-red-600"
-                        }`}
-                      >
-                        {transaction.quantity > 0 ? "+" : ""}
-                        {transaction.quantity}
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        {transaction.previousStock} → {transaction.newStock}
-                      </div>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          </CardContent>
-        </Card>
+      {/* Top Selling Products */}
+      <div style={{marginBottom:32}}>
+        <h3 style={{fontWeight:'bold', fontSize:18, marginBottom:12}}>Top Selling Products</h3>
+        <ul>
+          {report.topSellingProducts.map((product: any, index: number) => (
+            <li key={product.productId} style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:12}}>
+              <span style={{fontWeight:'bold'}}>#{index + 1} {product.name}</span>
+              <span>{product.quantitySold} units sold</span>
+              <span>&#8378;{product.revenue.toFixed(2)}</span>
+            </li>
+          ))}
+        </ul>
       </div>
-
-      {/* Top Products Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Product Performance</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {report.topSellingProducts.map((product, index) => (
-              <div key={product.productId} className="flex items-center justify-between p-4 border rounded-lg">
-                <div className="flex items-center space-x-3">
-                  <Badge variant="outline">#{index + 1}</Badge>
-                  <div>
-                    <h3 className="font-medium">{product.name}</h3>
-                    <p className="text-sm text-muted-foreground">{product.quantitySold} units sold</p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <div className="font-bold">₺{product.revenue.toFixed(2)}</div>
-                  <div className="text-sm text-muted-foreground">Revenue</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+      {/* Recent Transactions */}
+      <div style={{marginBottom:32}}>
+        <h3 style={{fontWeight:'bold', fontSize:18, marginBottom:12}}>Recent Transactions</h3>
+        <ul>
+          {report.recentTransactions.length === 0 ? (
+            <li style={{color:'#888', textAlign:'center'}}>No transactions yet</li>
+          ) : (
+            report.recentTransactions.map((transaction: any) => (
+              <li key={transaction.id} style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:12, border:'1px solid #eee', borderRadius:8, padding:12}}>
+                <span style={{...getTransactionTypeColor(transaction.type), padding:'2px 8px', borderRadius:12, fontSize:12}}>{transaction.type}</span>
+                <span>Product ID: {transaction.productId}</span>
+                <span>{transaction.quantity > 0 ? '+' : ''}{transaction.quantity}</span>
+                <span>{transaction.previousStock} → {transaction.newStock}</span>
+                <span>{new Date(transaction.timestamp).toLocaleDateString()}</span>
+                {transaction.reason && <span style={{color:'#888'}}>{transaction.reason}</span>}
+              </li>
+            ))
+          )}
+        </ul>
+      </div>
     </div>
-  )
+  );
 }

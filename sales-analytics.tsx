@@ -1,14 +1,25 @@
 "use client"
 
 import { useMemo } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts"
-import { TrendingUp, Calendar, Package, DollarSign } from "lucide-react"
-import type { Order } from "@/lib/types"
+// Removed custom UI components and recharts
+
+
+type Order = {
+  orderDate: string;
+  totalAmount: number;
+  items: Array<{
+    product: {
+      id: number;
+      name: string;
+      priceValue: number;
+      category: string;
+    };
+    quantity: number;
+  }>;
+};
 
 interface SalesAnalyticsProps {
-  orders: Order[]
+  orders: Order[];
 }
 
 export function SalesAnalytics({ orders }: SalesAnalyticsProps) {
@@ -97,120 +108,50 @@ export function SalesAnalytics({ orders }: SalesAnalyticsProps) {
   const COLORS = ["#8884d8", "#82ca9d", "#ffc658", "#ff7300", "#00ff00"]
 
   return (
-    <div className="space-y-6">
+    <div style={{padding:'24px'}}>
+      <h2 style={{fontWeight:'bold', fontSize:24, marginBottom:24}}>Sales Analytics</h2>
       {/* Monthly Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Monthly Orders</CardTitle>
-            <Calendar className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{analytics.monthlyStats.orders}</div>
-            <p className="text-xs text-muted-foreground">This month</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Monthly Revenue</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">₺{analytics.monthlyStats.revenue.toFixed(2)}</div>
-            <p className="text-xs text-muted-foreground">This month</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Avg Order Value</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">₺{analytics.monthlyStats.averageOrderValue.toFixed(2)}</div>
-            <p className="text-xs text-muted-foreground">Per order</p>
-          </CardContent>
-        </Card>
+      <div style={{display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:'24px', marginBottom:24}}>
+        <div style={{border:'1px solid #eee', borderRadius:8, padding:16, background:'#fff'}}>
+          <div style={{fontWeight:'bold', fontSize:14, marginBottom:8}}>Monthly Orders</div>
+          <div style={{fontWeight:'bold', fontSize:24}}>{analytics.monthlyStats.orders}</div>
+          <p style={{fontSize:12, color:'#888'}}>This month</p>
+        </div>
+        <div style={{border:'1px solid #eee', borderRadius:8, padding:16, background:'#fff'}}>
+          <div style={{fontWeight:'bold', fontSize:14, marginBottom:8}}>Monthly Revenue</div>
+          <div style={{fontWeight:'bold', fontSize:24}}>&#8378;{analytics.monthlyStats.revenue.toFixed(2)}</div>
+          <p style={{fontSize:12, color:'#888'}}>This month</p>
+        </div>
+        <div style={{border:'1px solid #eee', borderRadius:8, padding:16, background:'#fff'}}>
+          <div style={{fontWeight:'bold', fontSize:14, marginBottom:8}}>Avg Order Value</div>
+          <div style={{fontWeight:'bold', fontSize:24}}>&#8378;{analytics.monthlyStats.averageOrderValue.toFixed(2)}</div>
+          <p style={{fontSize:12, color:'#888'}}>Per order</p>
+        </div>
       </div>
-
-      {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Daily Sales Chart */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Daily Sales (Last 7 Days)</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={analytics.dailySalesData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="date" />
-                <YAxis />
-                <Tooltip />
-                <Bar dataKey="revenue" fill="#8884d8" />
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-
-        {/* Category Sales Pie Chart */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Sales by Category</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={analytics.categoryData}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                  outerRadius={80}
-                  fill="#8884d8"
-                  dataKey="value"
-                >
-                  {analytics.categoryData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
+      {/* Category Sales Summary */}
+      <div style={{marginBottom:24}}>
+        <h3 style={{fontWeight:'bold', fontSize:18, marginBottom:12}}>Sales by Category</h3>
+        <ul>
+          {analytics.categoryData.map((cat, idx) => (
+            <li key={cat.name} style={{marginBottom:8}}>
+              <span style={{fontWeight:'bold'}}>{cat.name}:</span> &#8378;{cat.value.toFixed(2)} ({cat.count} units)
+            </li>
+          ))}
+        </ul>
       </div>
-
       {/* Top Products */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <Package className="h-5 w-5" />
-            <span>Top Selling Products</span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {analytics.topProducts.map((product, index) => (
-              <div key={product.name} className="flex items-center justify-between p-4 border rounded-lg">
-                <div className="flex items-center space-x-3">
-                  <Badge variant="outline">#{index + 1}</Badge>
-                  <div>
-                    <h3 className="font-medium">{product.name}</h3>
-                    <p className="text-sm text-muted-foreground">{product.quantity} units sold</p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <div className="font-bold">₺{product.revenue.toFixed(2)}</div>
-                  <div className="text-sm text-muted-foreground">Revenue</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+      <div style={{border:'1px solid #eee', borderRadius:8, padding:16, background:'#fff'}}>
+        <h3 style={{fontWeight:'bold', fontSize:18, marginBottom:12}}>Top Selling Products</h3>
+        <ul>
+          {analytics.topProducts.map((product, index) => (
+            <li key={product.name} style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:12}}>
+              <span style={{fontWeight:'bold'}}>#{index + 1} {product.name}</span>
+              <span>{product.quantity} units sold</span>
+              <span>&#8378;{product.revenue.toFixed(2)}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
     </div>
-  )
+  );
 }

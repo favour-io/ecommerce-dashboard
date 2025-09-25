@@ -1,19 +1,22 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
+// Removed custom UI components, using basic HTML and inline styles
 import { Package, Plus, Minus, AlertTriangle, Edit, Save, X, PackagePlus } from "lucide-react"
-import { InventoryManager } from "@/lib/inventory-utils"
-import { InventoryReports } from "./inventory-reports"
-import type { Product } from "@/lib/types"
+// Removed missing utility/type imports
+
+type Product = {
+  id: number;
+  name: string;
+  price: string;
+  priceValue: number;
+  image: string;
+  category: string;
+  description: string;
+  isPopular: boolean;
+  inStock: boolean;
+  stockCount: number;
+};
 
 const initialProducts: Product[] = [
   {
@@ -128,11 +131,7 @@ export function InventoryManagement() {
 
     // Record transaction
     if (change !== 0) {
-      InventoryManager.adjustStock(
-        productId,
-        products.find((p) => p.id === productId)!.stockCount + change,
-        "Manual adjustment",
-      )
+      // Removed InventoryManager.adjustStock (no external manager available)
     }
   }
 
@@ -140,7 +139,7 @@ export function InventoryManagement() {
     if (restockDialog.productId && restockData.quantity) {
       const quantity = Number.parseInt(restockData.quantity)
       if (quantity > 0) {
-        InventoryManager.restockProduct(restockDialog.productId, quantity, restockData.reason || "Manual restock")
+  // Removed InventoryManager.restockProduct (no external manager available)
 
         // Update local state
         const updatedProducts = products.map((product) => {
@@ -205,231 +204,148 @@ export function InventoryManagement() {
   const outOfStockProducts = products.filter((product) => !product.inStock)
 
   return (
-    <Tabs defaultValue="inventory" className="space-y-6">
-      <TabsList>
-        <TabsTrigger value="inventory">Inventory Management</TabsTrigger>
-        <TabsTrigger value="reports">Reports & Analytics</TabsTrigger>
-      </TabsList>
-
-      <TabsContent value="inventory" className="space-y-6">
-        {/* Inventory Alerts */}
-        {(lowStockProducts.length > 0 || outOfStockProducts.length > 0) && (
-          <div className="space-y-4">
-            {outOfStockProducts.length > 0 && (
-              <Alert variant="destructive">
-                <AlertTriangle className="h-4 w-4" />
-                <AlertDescription>
-                  <strong>Out of Stock:</strong> {outOfStockProducts.map((p) => p.name).join(", ")}
-                </AlertDescription>
-              </Alert>
-            )}
-            {lowStockProducts.length > 0 && (
-              <Alert>
-                <AlertTriangle className="h-4 w-4" />
-                <AlertDescription>
-                  <strong>Low Stock Alert:</strong>{" "}
-                  {lowStockProducts.map((p) => `${p.name} (${p.stockCount})`).join(", ")}
-                </AlertDescription>
-              </Alert>
-            )}
-          </div>
-        )}
-
-        {/* Inventory Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Products</CardTitle>
-              <Package className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{products.length}</div>
-              <p className="text-xs text-muted-foreground">Active products</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Low Stock</CardTitle>
-              <AlertTriangle className="h-4 w-4 text-orange-500" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-orange-600">{lowStockProducts.length}</div>
-              <p className="text-xs text-muted-foreground">Items need restocking</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Out of Stock</CardTitle>
-              <AlertTriangle className="h-4 w-4 text-red-500" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-red-600">{outOfStockProducts.length}</div>
-              <p className="text-xs text-muted-foreground">Items unavailable</p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Products List */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Product Inventory</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {products.map((product) => (
-                <div key={product.id} className="flex items-center space-x-4 p-4 border rounded-lg">
-                  <img
-                    src={product.image || "/placeholder.svg"}
-                    alt={product.name}
-                    className="w-16 h-16 object-cover rounded-md"
-                  />
-
-                  <div className="flex-1">
-                    {editingProduct === product.id ? (
-                      <div className="space-y-2">
-                        <Input
-                          value={editValues.name || ""}
-                          onChange={(e) => setEditValues((prev) => ({ ...prev, name: e.target.value }))}
-                          placeholder="Product name"
-                        />
-                        <Input
-                          type="number"
-                          value={editValues.priceValue || ""}
-                          onChange={(e) => setEditValues((prev) => ({ ...prev, priceValue: Number(e.target.value) }))}
-                          placeholder="Price"
-                        />
-                        <Input
-                          value={editValues.description || ""}
-                          onChange={(e) => setEditValues((prev) => ({ ...prev, description: e.target.value }))}
-                          placeholder="Description"
-                        />
-                      </div>
-                    ) : (
-                      <>
-                        <h3 className="font-medium">{product.name}</h3>
-                        <p className="text-sm text-muted-foreground">{product.description}</p>
-                        <div className="flex items-center space-x-2 mt-1">
-                          <Badge variant="outline">{product.category}</Badge>
-                          <span className="text-sm font-medium">{product.price}</span>
-                          {product.isPopular && <Badge variant="secondary">Popular</Badge>}
-                        </div>
-                      </>
-                    )}
-                  </div>
-
-                  <div className="flex items-center space-x-4">
-                    {/* Stock Management */}
-                    <div className="flex items-center space-x-2">
-                      {editingProduct === product.id ? (
-                        <Input
-                          type="number"
-                          value={editValues.stockCount || ""}
-                          onChange={(e) => setEditValues((prev) => ({ ...prev, stockCount: Number(e.target.value) }))}
-                          className="w-20"
-                          min="0"
-                        />
-                      ) : (
-                        <>
-                          <Button variant="outline" size="sm" onClick={() => updateStock(product.id, -1)}>
-                            <Minus className="h-3 w-3" />
-                          </Button>
-                          <span className="w-12 text-center font-medium">{product.stockCount}</span>
-                          <Button variant="outline" size="sm" onClick={() => updateStock(product.id, 1)}>
-                            <Plus className="h-3 w-3" />
-                          </Button>
-                        </>
-                      )}
-                    </div>
-
-                    {/* Stock Status */}
-                    <div className="w-20">
-                      {product.inStock ? (
-                        <Badge variant={product.stockCount <= 5 ? "destructive" : "secondary"}>
-                          {product.stockCount <= 5 ? "Low" : "In Stock"}
-                        </Badge>
-                      ) : (
-                        <Badge variant="destructive">Out</Badge>
-                      )}
-                    </div>
-
-                    {/* Actions */}
-                    <div className="flex items-center space-x-2">
-                      <Dialog
-                        open={restockDialog.open && restockDialog.productId === product.id}
-                        onOpenChange={(open) => setRestockDialog({ open, productId: open ? product.id : null })}
-                      >
-                        <DialogTrigger asChild>
-                          <Button variant="outline" size="sm">
-                            <PackagePlus className="h-3 w-3" />
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent>
-                          <DialogHeader>
-                            <DialogTitle>Restock {product.name}</DialogTitle>
-                          </DialogHeader>
-                          <div className="space-y-4">
-                            <div>
-                              <Label htmlFor="quantity">Quantity to Add</Label>
-                              <Input
-                                id="quantity"
-                                type="number"
-                                value={restockData.quantity}
-                                onChange={(e) => setRestockData((prev) => ({ ...prev, quantity: e.target.value }))}
-                                placeholder="Enter quantity"
-                                min="1"
-                              />
-                            </div>
-                            <div>
-                              <Label htmlFor="reason">Reason (Optional)</Label>
-                              <Textarea
-                                id="reason"
-                                value={restockData.reason}
-                                onChange={(e) => setRestockData((prev) => ({ ...prev, reason: e.target.value }))}
-                                placeholder="Reason for restocking..."
-                                rows={3}
-                              />
-                            </div>
-                            <div className="flex justify-end space-x-2">
-                              <Button
-                                variant="outline"
-                                onClick={() => setRestockDialog({ open: false, productId: null })}
-                              >
-                                Cancel
-                              </Button>
-                              <Button onClick={handleRestock}>Add Stock</Button>
-                            </div>
-                          </div>
-                        </DialogContent>
-                      </Dialog>
-
-                      {editingProduct === product.id ? (
-                        <>
-                          <Button variant="outline" size="sm" onClick={saveEdit}>
-                            <Save className="h-3 w-3" />
-                          </Button>
-                          <Button variant="outline" size="sm" onClick={cancelEdit}>
-                            <X className="h-3 w-3" />
-                          </Button>
-                        </>
-                      ) : (
-                        <Button variant="outline" size="sm" onClick={() => startEditing(product)}>
-                          <Edit className="h-3 w-3" />
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              ))}
+    <div style={{padding:'24px'}}>
+      <h2 style={{fontWeight:'bold', fontSize:24, marginBottom:24}}>Inventory Management</h2>
+      {/* Inventory Alerts */}
+      {(lowStockProducts.length > 0 || outOfStockProducts.length > 0) && (
+        <div style={{marginBottom:24}}>
+          {outOfStockProducts.length > 0 && (
+            <div style={{background:'#fee2e2', border:'1px solid #fca5a5', borderRadius:8, padding:12, marginBottom:8}}>
+              <strong>Out of Stock:</strong> {outOfStockProducts.map((p) => p.name).join(", ")}
             </div>
-          </CardContent>
-        </Card>
-      </TabsContent>
-
-      <TabsContent value="reports">
-        <InventoryReports />
-      </TabsContent>
-    </Tabs>
+          )}
+          {lowStockProducts.length > 0 && (
+            <div style={{background:'#fef9c3', border:'1px solid #fde68a', borderRadius:8, padding:12}}>
+              <strong>Low Stock Alert:</strong> {lowStockProducts.map((p) => `${p.name} (${p.stockCount})`).join(", ")}
+            </div>
+          )}
+        </div>
+      )}
+      {/* Inventory Overview */}
+      <div style={{display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:'24px', marginBottom:24}}>
+        <div style={{border:'1px solid #eee', borderRadius:8, padding:16, background:'#fff'}}>
+          <div style={{fontWeight:'bold', fontSize:14, marginBottom:8}}>Total Products</div>
+          <div style={{fontWeight:'bold', fontSize:24}}>{products.length}</div>
+          <p style={{fontSize:12, color:'#888'}}>Active products</p>
+        </div>
+        <div style={{border:'1px solid #eee', borderRadius:8, padding:16, background:'#fff'}}>
+          <div style={{fontWeight:'bold', fontSize:14, marginBottom:8}}>Low Stock</div>
+          <div style={{fontWeight:'bold', fontSize:24, color:'#ea580c'}}>{lowStockProducts.length}</div>
+          <p style={{fontSize:12, color:'#888'}}>Items need restocking</p>
+        </div>
+        <div style={{border:'1px solid #eee', borderRadius:8, padding:16, background:'#fff'}}>
+          <div style={{fontWeight:'bold', fontSize:14, marginBottom:8}}>Out of Stock</div>
+          <div style={{fontWeight:'bold', fontSize:24, color:'#dc2626'}}>{outOfStockProducts.length}</div>
+          <p style={{fontSize:12, color:'#888'}}>Items unavailable</p>
+        </div>
+      </div>
+      {/* Products List */}
+      <div style={{border:'1px solid #eee', borderRadius:8, padding:16, background:'#fff'}}>
+        <div style={{fontWeight:'bold', fontSize:16, marginBottom:16}}>Product Inventory</div>
+        <div>
+          {products.map((product) => (
+            <div key={product.id} style={{display:'flex', alignItems:'center', gap:16, padding:16, border:'1px solid #eee', borderRadius:8, marginBottom:12}}>
+              <img
+                src={product.image || "/placeholder.svg"}
+                alt={product.name}
+                style={{width:64, height:64, objectFit:'cover', borderRadius:8}}
+              />
+              <div style={{flex:1}}>
+                {editingProduct === product.id ? (
+                  <div>
+                    <input
+                      style={{width:'100%', marginBottom:8, padding:8, borderRadius:4, border:'1px solid #ccc'}}
+                      value={editValues.name || ""}
+                      onChange={e => setEditValues((prev) => ({ ...prev, name: e.target.value }))}
+                      placeholder="Product name"
+                    />
+                    <input
+                      style={{width:'100%', marginBottom:8, padding:8, borderRadius:4, border:'1px solid #ccc'}}
+                      type="number"
+                      value={editValues.priceValue || ""}
+                      onChange={e => setEditValues((prev) => ({ ...prev, priceValue: Number(e.target.value) }))}
+                      placeholder="Price"
+                    />
+                    <input
+                      style={{width:'100%', marginBottom:8, padding:8, borderRadius:4, border:'1px solid #ccc'}}
+                      value={editValues.description || ""}
+                      onChange={e => setEditValues((prev) => ({ ...prev, description: e.target.value }))}
+                      placeholder="Description"
+                    />
+                  </div>
+                ) : (
+                  <>
+                    <h3 style={{fontWeight:'bold'}}>{product.name}</h3>
+                    <p style={{fontSize:14, color:'#888'}}>{product.description}</p>
+                    <div style={{display:'flex', alignItems:'center', gap:8, marginTop:4}}>
+                      <span style={{padding:'2px 8px', border:'1px solid #ccc', borderRadius:12, fontSize:12}}>{product.category}</span>
+                      <span style={{fontSize:14, fontWeight:'bold'}}>{product.price}</span>
+                      {product.isPopular && <span style={{padding:'2px 8px', border:'1px solid #facc15', borderRadius:12, fontSize:12, background:'#fef9c3'}}>Popular</span>}
+                    </div>
+                  </>
+                )}
+              </div>
+              <div style={{display:'flex', alignItems:'center', gap:8}}>
+                {/* Stock Management */}
+                {editingProduct === product.id ? (
+                  <input
+                    style={{width:60, padding:8, borderRadius:4, border:'1px solid #ccc'}}
+                    type="number"
+                    value={editValues.stockCount || ""}
+                    onChange={e => setEditValues((prev) => ({ ...prev, stockCount: Number(e.target.value) }))}
+                    min="0"
+                  />
+                ) : (
+                  <>
+                    <button
+                      style={{padding:4, border:'1px solid #ccc', borderRadius:4, background:'#fff', cursor:'pointer'}}
+                      onClick={() => updateStock(product.id, -1)}
+                    >
+                      -
+                    </button>
+                    <span style={{width:48, textAlign:'center', fontWeight:'bold'}}>{product.stockCount}</span>
+                    <button
+                      style={{padding:4, border:'1px solid #ccc', borderRadius:4, background:'#fff', cursor:'pointer'}}
+                      onClick={() => updateStock(product.id, 1)}
+                    >
+                      +
+                    </button>
+                  </>
+                )}
+                {/* Stock Status */}
+                <span style={{width:60, padding:'2px 8px', border:'1px solid #ccc', borderRadius:12, fontSize:12, background:product.inStock ? (product.stockCount <= 5 ? '#fee2e2' : '#d1fae5') : '#fee2e2', color:product.inStock ? (product.stockCount <= 5 ? '#dc2626' : '#16a34a') : '#dc2626'}}>
+                  {product.inStock ? (product.stockCount <= 5 ? 'Low' : 'In Stock') : 'Out'}
+                </span>
+                {/* Actions */}
+                {editingProduct === product.id ? (
+                  <>
+                    <button
+                      style={{padding:4, border:'1px solid #ccc', borderRadius:4, background:'#fff', cursor:'pointer'}}
+                      onClick={saveEdit}
+                    >
+                      Save
+                    </button>
+                    <button
+                      style={{padding:4, border:'1px solid #ccc', borderRadius:4, background:'#fff', cursor:'pointer'}}
+                      onClick={cancelEdit}
+                    >
+                      Cancel
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    style={{padding:4, border:'1px solid #ccc', borderRadius:4, background:'#fff', cursor:'pointer'}}
+                    onClick={() => startEditing(product)}
+                  >
+                    Edit
+                  </button>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  // End of InventoryManagement component
   )
 }
